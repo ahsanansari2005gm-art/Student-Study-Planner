@@ -1,6 +1,7 @@
-# Student Study Planner & Grade Dashboard
+# Student Study Planner & Task Dashboard
 
-A web application built with HTML, CSS, and JavaScript using VS Code and GitHub Copilot.
+A responsive study planner built with HTML, CSS, and JavaScript. Tasks and
+courses are stored locally in the browser.
 
 ## Version 1
 - Add, edit, and delete courses
@@ -11,14 +12,16 @@ A web application built with HTML, CSS, and JavaScript using VS Code and GitHub 
 - localStorage persistence
 
 ## Version 2
-- Everything in Version 1
-- Dashboard statistics
-- Total, completed, remaining, and overdue assignment counts
-- Optional assignment grades
-- Average grade based only on graded assignments
-- Assignment filtering
-- Automatic overdue detection
-- Due-date sorting
+- Task categories: School, Work, Personal, Shopping, and Other
+- Low, Medium, and High priority levels
+- Task descriptions and optional due dates
+- Automatic overdue detection and due-date sorting
+- Search by task title
+- Filters for active, completed, overdue, high priority, and category
+- Full task editing, completion, reopening, and deletion
+- Dashboard statistics for total, active, completed, and overdue tasks
+- Dark/light mode with saved theme preference
+- Backward-compatible localStorage persistence
 
 ## Technologies
 - HTML

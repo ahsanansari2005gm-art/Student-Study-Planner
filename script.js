@@ -1,144 +1,21 @@
-const courseForm = document.getElementById("courseForm");
-const assignmentForm = document.getElementById("assignmentForm");
-const courseList = document.getElementById("courseList");
-const assignmentList = document.getElementById("assignmentList");
-const assignmentCourse = document.getElementById("assignmentCourse");
-
-let courses = JSON.parse(localStorage.getItem("studyPlannerCourses")) || [];
-let assignments = JSON.parse(localStorage.getItem("studyPlannerAssignments")) || [];
-
-function saveData() {
-  localStorage.setItem("studyPlannerCourses", JSON.stringify(courses));
-  localStorage.setItem("studyPlannerAssignments", JSON.stringify(assignments));
-}
-
-function renderCourses() {
-  courseList.innerHTML = "";
-  assignmentCourse.innerHTML = '<option value="">Select course</option>';
-
-  courses.forEach(course => {
-    const option = document.createElement("option");
-    option.value = course.id;
-    option.textContent = `${course.code} - ${course.name}`;
-    assignmentCourse.appendChild(option);
-
-    const div = document.createElement("div");
-    div.className = "item";
-    div.innerHTML = `
-      <div class="item-info">
-        <h3>${course.code}</h3>
-        <p>${course.name}</p>
-      </div>
-      <div class="actions">
-        <button class="edit" onclick="editCourse(${course.id})">Edit</button>
-        <button class="delete" onclick="deleteCourse(${course.id})">Delete</button>
-      </div>
-    `;
-    courseList.appendChild(div);
-  });
-
-  if (!courses.length) courseList.innerHTML = '<p class="empty">No courses added yet.</p>';
-}
-
-function renderAssignments() {
-  assignmentList.innerHTML = "";
-
-  assignments.forEach(a => {
-    const course = courses.find(c => c.id === a.courseId);
-    const div = document.createElement("div");
-    div.className = "item";
-    div.innerHTML = `
-      <div class="item-info">
-        <h3>${a.title}</h3>
-        <p>Course: ${course ? `${course.code} - ${course.name}` : "Deleted course"}</p>
-        <p>Due: ${a.dueDate}</p>
-        <p>Priority: ${a.priority} | Status: ${a.status}</p>
-      </div>
-      <div class="actions">
-        <button class="edit" onclick="editAssignment(${a.id})">Edit</button>
-        <button class="delete" onclick="deleteAssignment(${a.id})">Delete</button>
-      </div>
-    `;
-    assignmentList.appendChild(div);
-  });
-
-  if (!assignments.length) assignmentList.innerHTML = '<p class="empty">No assignments added yet.</p>';
-}
-
-courseForm.addEventListener("submit", e => {
-  e.preventDefault();
-  courses.push({
-    id: Date.now(),
-    name: document.getElementById("courseName").value.trim(),
-    code: document.getElementById("courseCode").value.trim()
-  });
-  courseForm.reset();
-  saveData();
-  renderCourses();
-});
-
-assignmentForm.addEventListener("submit", e => {
-  e.preventDefault();
-  assignments.push({
-    id: Date.now(),
-    title: document.getElementById("assignmentTitle").value.trim(),
-    courseId: Number(assignmentCourse.value),
-    dueDate: document.getElementById("assignmentDue").value,
-    priority: document.getElementById("assignmentPriority").value,
-    status: document.getElementById("assignmentStatus").value
-  });
-  assignmentForm.reset();
-  saveData();
-  renderAssignments();
-});
-
-function editCourse(id) {
-  const course = courses.find(c => c.id === id);
-  const name = prompt("Edit course name:", course.name);
-  if (name === null) return;
-  const code = prompt("Edit course code:", course.code);
-  if (code === null) return;
-  course.name = name.trim() || course.name;
-  course.code = code.trim() || course.code;
-  saveData();
-  renderCourses();
-  renderAssignments();
-}
-
-function deleteCourse(id) {
-  if (!confirm("Delete this course?")) return;
-  courses = courses.filter(c => c.id !== id);
-  assignments = assignments.filter(a => a.courseId !== id);
-  saveData();
-  renderCourses();
-  renderAssignments();
-}
-
-function editAssignment(id) {
-  const a = assignments.find(x => x.id === id);
-  const title = prompt("Edit assignment title:", a.title);
-  if (title === null) return;
-  const dueDate = prompt("Edit due date (YYYY-MM-DD):", a.dueDate);
-  if (dueDate === null) return;
-  const priority = prompt("Priority: Low, Medium, or High", a.priority);
-  if (priority === null) return;
-  const status = prompt("Status: Not Started, In Progress, or Completed", a.status);
-  if (status === null) return;
-
-  a.title = title.trim() || a.title;
-  a.dueDate = dueDate.trim() || a.dueDate;
-  if (["Low","Medium","High"].includes(priority)) a.priority = priority;
-  if (["Not Started","In Progress","Completed"].includes(status)) a.status = status;
-  saveData();
-  renderAssignments();
-}
-
-function deleteAssignment(id) {
-  if (!confirm("Delete this assignment?")) return;
-  assignments = assignments.filter(a => a.id !== id);
-  saveData();
-  renderAssignments();
-}
-
-renderCourses();
-renderAssignments();
+const courseForm=document.getElementById("courseForm"),assignmentForm=document.getElementById("assignmentForm"),courseList=document.getElementById("courseList"),assignmentList=document.getElementById("assignmentList"),assignmentCourse=document.getElementById("assignmentCourse"),assignmentSubmit=document.getElementById("assignmentSubmit"),cancelEdit=document.getElementById("cancelEdit"),taskSearch=document.getElementById("taskSearch"),taskFilter=document.getElementById("taskFilter"),categoryFilter=document.getElementById("categoryFilter"),themeToggle=document.getElementById("themeToggle");
+let courses=JSON.parse(localStorage.getItem("studyPlannerCourses"))||[],assignments=JSON.parse(localStorage.getItem("studyPlannerAssignments"))||[],editingAssignmentId=null;
+function saveData(){localStorage.setItem("studyPlannerCourses",JSON.stringify(courses));localStorage.setItem("studyPlannerAssignments",JSON.stringify(assignments));}
+function escapeHTML(value=""){return String(value).replace(/[&<>'"]/g,character=>({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;",'"':"&quot;"}[character]));}
+function isOverdue(task){return Boolean(task.dueDate&&task.status!=="Completed"&&task.dueDate<new Date().toISOString().slice(0,10));}
+function updateStats(){document.getElementById("totalTasks").textContent=assignments.length;document.getElementById("activeTasks").textContent=assignments.filter(task=>task.status!=="Completed").length;document.getElementById("completedTasks").textContent=assignments.filter(task=>task.status==="Completed").length;document.getElementById("overdueTasks").textContent=assignments.filter(isOverdue).length;}
+function renderCourses(){courseList.innerHTML="";assignmentCourse.innerHTML='<option value="">Select course</option>';courses.forEach(course=>{const option=document.createElement("option");option.value=course.id;option.textContent=`${course.code} - ${course.name}`;assignmentCourse.appendChild(option);const div=document.createElement("div");div.className="item";div.innerHTML=`<div class="item-info"><h3>${escapeHTML(course.code)}</h3><p>${escapeHTML(course.name)}</p></div><div class="actions"><button class="edit" onclick="editCourse(${course.id})">Edit</button><button class="delete" onclick="deleteCourse(${course.id})">Delete</button></div>`;courseList.appendChild(div);});if(!courses.length)courseList.innerHTML='<p class="empty">No courses added yet.</p>';}
+function renderAssignments(){assignmentList.innerHTML="";const search=taskSearch.value.trim().toLowerCase(),selectedFilter=taskFilter.value,selectedCategory=categoryFilter.value;const visibleAssignments=assignments.filter(task=>{const matchesSearch=task.title.toLowerCase().includes(search);const matchesFilter=selectedFilter==="all"||(selectedFilter==="active"&&task.status!=="Completed")||(selectedFilter==="completed"&&task.status==="Completed")||(selectedFilter==="overdue"&&isOverdue(task))||(selectedFilter==="priority"&&task.priority==="High")||(selectedFilter==="category"&&(selectedCategory==="all"||task.category===selectedCategory));return matchesSearch&&matchesFilter;});visibleAssignments.sort((first,second)=>(first.dueDate||"9999-12-31").localeCompare(second.dueDate||"9999-12-31"));visibleAssignments.forEach(task=>{const course=courses.find(courseItem=>courseItem.id===task.courseId),overdue=isOverdue(task),div=document.createElement("div");div.className=`item task-card priority-${task.priority.toLowerCase()}${task.status==="Completed"?" completed":""}`;div.innerHTML=`<div class="item-info"><h3>${escapeHTML(task.title)}</h3>${task.description?`<p class="description">${escapeHTML(task.description)}</p>`:""}<p>Course: ${course?`${escapeHTML(course.code)} - ${escapeHTML(course.name)}`:"Deleted course"}</p><p>Due: ${task.dueDate?escapeHTML(task.dueDate):"No due date"}${overdue?' <strong class="overdue-text">(Overdue)</strong>':""}</p><div class="task-meta"><span class="badge">${escapeHTML(task.category||"Other")}</span><span class="badge badge-${task.priority.toLowerCase()}">${escapeHTML(task.priority)} priority</span><span class="badge">${escapeHTML(task.status)}</span>${overdue?'<span class="badge badge-overdue">Overdue</span>':""}</div></div><div class="actions"><button class="complete" onclick="toggleAssignment(${task.id})">${task.status==="Completed"?"Reopen":"Complete"}</button><button class="edit" onclick="editAssignment(${task.id})">Edit</button><button class="delete" onclick="deleteAssignment(${task.id})">Delete</button></div>`;assignmentList.appendChild(div);});if(!visibleAssignments.length)assignmentList.innerHTML=`<p class="empty">${assignments.length?"No tasks match your search or filter.":"No tasks added yet."}</p>`;updateStats();}
+function resetAssignmentForm(){assignmentForm.reset();document.getElementById("assignmentCategory").value="Other";document.getElementById("assignmentPriority").value="Medium";document.getElementById("assignmentStatus").value="Not Started";editingAssignmentId=null;assignmentSubmit.textContent="Add Task";cancelEdit.classList.add("hidden");}
+courseForm.addEventListener("submit",event=>{event.preventDefault();courses.push({id:Date.now(),name:document.getElementById("courseName").value.trim(),code:document.getElementById("courseCode").value.trim()});courseForm.reset();saveData();renderCourses();});
+assignmentForm.addEventListener("submit",event=>{event.preventDefault();const task={id:editingAssignmentId||Date.now(),title:document.getElementById("assignmentTitle").value.trim(),description:document.getElementById("assignmentDescription").value.trim(),courseId:Number(assignmentCourse.value),category:document.getElementById("assignmentCategory").value,dueDate:document.getElementById("assignmentDue").value,priority:document.getElementById("assignmentPriority").value,status:document.getElementById("assignmentStatus").value};assignments=editingAssignmentId?assignments.map(item=>item.id===editingAssignmentId?task:item):[...assignments,task];resetAssignmentForm();saveData();renderAssignments();});
+cancelEdit.addEventListener("click",resetAssignmentForm);
+function editCourse(id){const course=courses.find(item=>item.id===id),name=prompt("Edit course name:",course.name);if(name===null)return;const code=prompt("Edit course code:",course.code);if(code===null)return;course.name=name.trim()||course.name;course.code=code.trim()||course.code;saveData();renderCourses();renderAssignments();}
+function deleteCourse(id){if(!confirm("Delete this course and its tasks?"))return;courses=courses.filter(course=>course.id!==id);assignments=assignments.filter(task=>task.courseId!==id);saveData();renderCourses();renderAssignments();}
+function editAssignment(id){const task=assignments.find(item=>item.id===id);if(!task)return;document.getElementById("assignmentTitle").value=task.title;document.getElementById("assignmentDescription").value=task.description||"";assignmentCourse.value=task.courseId;document.getElementById("assignmentCategory").value=task.category||"Other";document.getElementById("assignmentDue").value=task.dueDate||"";document.getElementById("assignmentPriority").value=task.priority||"Medium";document.getElementById("assignmentStatus").value=task.status||"Not Started";editingAssignmentId=id;assignmentSubmit.textContent="Save Changes";cancelEdit.classList.remove("hidden");document.getElementById("assignmentTitle").focus();}
+function toggleAssignment(id){const task=assignments.find(item=>item.id===id);if(!task)return;task.status=task.status==="Completed"?"Not Started":"Completed";saveData();renderAssignments();}
+function deleteAssignment(id){if(!confirm("Delete this task?"))return;assignments=assignments.filter(task=>task.id!==id);saveData();renderAssignments();}
+taskSearch.addEventListener("input",renderAssignments);taskFilter.addEventListener("change",()=>{categoryFilter.classList.toggle("hidden",taskFilter.value!=="category");renderAssignments();});categoryFilter.addEventListener("change",renderAssignments);
+function applyTheme(theme){document.body.classList.toggle("dark",theme==="dark");themeToggle.textContent=theme==="dark"?"Light mode":"Dark mode";}
+applyTheme(localStorage.getItem("studyPlannerTheme")||"light");themeToggle.addEventListener("click",()=>{const nextTheme=document.body.classList.contains("dark")?"light":"dark";localStorage.setItem("studyPlannerTheme",nextTheme);applyTheme(nextTheme);});
+renderCourses();renderAssignments();

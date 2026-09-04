@@ -3,15 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Student Study Planner & Grade Dashboard</title>
+  <title>Student Study Planner & Task Dashboard</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <header>
-    <h1>Student Study Planner & Grade Dashboard</h1>
-    <p>Version 1 — Basic</p>
+    <h1>Student Study Planner & Task Dashboard</h1>
+    <p>Version 2</p>
   </header>
-
   <main class="container">
     <section class="card">
       <h2>Courses</h2>
@@ -22,32 +21,36 @@
       </form>
       <div id="courseList"></div>
     </section>
-
-    <section class="card">
-      <h2>Assignments</h2>
+    <section class="card task-section">
+      <div class="section-heading">
+        <div><h2>Tasks & Assignments</h2><p class="section-note">Plan your work and keep every deadline visible.</p></div>
+        <button id="themeToggle" class="theme-toggle" type="button">Dark mode</button>
+      </div>
+      <div class="stats" aria-label="Task statistics">
+        <div class="stat"><span id="totalTasks">0</span><small>Total Tasks</small></div>
+        <div class="stat"><span id="activeTasks">0</span><small>Active Tasks</small></div>
+        <div class="stat"><span id="completedTasks">0</span><small>Completed Tasks</small></div>
+        <div class="stat stat-alert"><span id="overdueTasks">0</span><small>Overdue Tasks</small></div>
+      </div>
       <form id="assignmentForm">
-        <input id="assignmentTitle" type="text" placeholder="Assignment title" required>
-        <select id="assignmentCourse" required>
-          <option value="">Select course</option>
-        </select>
-        <input id="assignmentDue" type="date" required>
-        <select id="assignmentPriority">
-          <option>Low</option>
-          <option selected>Medium</option>
-          <option>High</option>
-        </select>
-        <select id="assignmentStatus">
-          <option selected>Not Started</option>
-          <option>In Progress</option>
-          <option>Completed</option>
-        </select>
-        <button type="submit">Add Assignment</button>
+        <input id="assignmentTitle" type="text" placeholder="Task title" required>
+        <textarea id="assignmentDescription" placeholder="Description (optional)" rows="2"></textarea>
+        <select id="assignmentCourse" required><option value="">Select course</option></select>
+        <select id="assignmentCategory"><option>School</option><option>Work</option><option>Personal</option><option>Shopping</option><option selected>Other</option></select>
+        <input id="assignmentDue" type="date">
+        <select id="assignmentPriority"><option>Low</option><option selected>Medium</option><option>High</option></select>
+        <select id="assignmentStatus"><option selected>Not Started</option><option>In Progress</option><option>Completed</option></select>
+        <button id="assignmentSubmit" type="submit">Add Task</button>
+        <button id="cancelEdit" class="secondary hidden" type="button">Cancel edit</button>
       </form>
-
+      <div class="task-controls">
+        <label class="search-wrap"><span class="sr-only">Search tasks by title</span><input id="taskSearch" type="search" placeholder="Search tasks by title..."></label>
+        <select id="taskFilter" aria-label="Filter tasks"><option value="all">All tasks</option><option value="active">Active</option><option value="completed">Completed</option><option value="overdue">Overdue</option><option value="priority">High priority</option><option value="category">By category</option></select>
+        <select id="categoryFilter" aria-label="Choose category" class="hidden"><option value="all">All categories</option><option>School</option><option>Work</option><option>Personal</option><option>Shopping</option><option>Other</option></select>
+      </div>
       <div id="assignmentList"></div>
     </section>
   </main>
-
   <script src="script.js"></script>
 </body>
 </html>
