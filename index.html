@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student Study Planner & Grade Dashboard</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <h1>Student Study Planner & Grade Dashboard</h1>
+    <p>Version 1 — Basic</p>
+  </header>
+
+  <main class="container">
+    <section class="card">
+      <h2>Courses</h2>
+      <form id="courseForm">
+        <input id="courseName" type="text" placeholder="Course name" required>
+        <input id="courseCode" type="text" placeholder="Course code" required>
+        <button type="submit">Add Course</button>
+      </form>
+      <div id="courseList"></div>
+    </section>
+
+    <section class="card">
+      <h2>Assignments</h2>
+      <form id="assignmentForm">
+        <input id="assignmentTitle" type="text" placeholder="Assignment title" required>
+        <select id="assignmentCourse" required>
+          <option value="">Select course</option>
+        </select>
+        <input id="assignmentDue" type="date" required>
+        <select id="assignmentPriority">
+          <option>Low</option>
+          <option selected>Medium</option>
+          <option>High</option>
+        </select>
+        <select id="assignmentStatus">
+          <option selected>Not Started</option>
+          <option>In Progress</option>
+          <option>Completed</option>
+        </select>
+        <button type="submit">Add Assignment</button>
+      </form>
+
+      <div id="assignmentList"></div>
+    </section>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
